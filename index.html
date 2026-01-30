@@ -18,7 +18,6 @@
             --white: #FFFFFF;
             --shadow: rgba(26, 26, 26, 0.08);
             --shadow-deep: rgba(26, 26, 26, 0.15);
-            --error: #D64545;
         }
 
         * {
@@ -35,6 +34,7 @@
             overflow-x: hidden;
         }
 
+        /* Noise texture overlay */
         body::before {
             content: '';
             position: fixed;
@@ -85,7 +85,6 @@
         nav {
             display: flex;
             gap: 8px;
-            align-items: center;
         }
 
         .nav-btn {
@@ -117,29 +116,6 @@
             background: var(--gold);
             transform: translateY(-2px);
             box-shadow: 0 8px 24px var(--shadow-deep);
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .user-name {
-            font-weight: 500;
         }
 
         /* Hero Section */
@@ -182,12 +158,50 @@
             line-height: 1.6;
         }
 
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 40px 0;
+        }
+
+        .toggle-btn {
+            padding: 14px 32px;
+            border: 2px solid var(--blush);
+            background: transparent;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--charcoal);
+        }
+
+        .toggle-btn:first-child {
+            border-radius: 100px 0 0 100px;
+        }
+
+        .toggle-btn:last-child {
+            border-radius: 0 100px 100px 0;
+        }
+
+        .toggle-btn.active {
+            background: var(--charcoal);
+            border-color: var(--charcoal);
+            color: var(--white);
+        }
+
+        .toggle-btn:not(.active):hover {
+            background: var(--blush);
+        }
+
         /* Main Content Area */
         .main-content {
             display: grid;
             grid-template-columns: 1fr 380px;
             gap: 40px;
-            padding: 40px 0 80px;
+            padding: 20px 0 80px;
         }
 
         @media (max-width: 1024px) {
@@ -272,7 +286,7 @@
             border: 2px solid transparent;
         }
 
-        .day-cell:not(.empty):not(.past):not(.no-availability):hover {
+        .day-cell:not(.empty):not(.past):hover {
             background: var(--blush);
             transform: scale(1.05);
         }
@@ -284,11 +298,6 @@
         .day-cell.past {
             color: var(--blush);
             cursor: default;
-        }
-
-        .day-cell.no-availability {
-            color: var(--blush);
-            cursor: not-allowed;
         }
 
         .day-cell.today {
@@ -311,7 +320,7 @@
             border-radius: 50%;
         }
 
-        .day-cell.fully-booked::after {
+        .day-cell.booked::after {
             content: '';
             position: absolute;
             bottom: 6px;
@@ -329,7 +338,6 @@
             padding-top: 24px;
             border-top: 1px solid var(--blush);
             justify-content: center;
-            flex-wrap: wrap;
         }
 
         .legend-item {
@@ -352,10 +360,6 @@
 
         .legend-dot.booked {
             background: var(--rose);
-        }
-
-        .legend-dot.unavailable {
-            background: var(--blush);
         }
 
         /* Sidebar */
@@ -391,8 +395,6 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            max-height: 300px;
-            overflow-y: auto;
         }
 
         .time-slot {
@@ -406,7 +408,7 @@
             font-weight: 500;
         }
 
-        .time-slot:hover:not(.booked) {
+        .time-slot:hover:not(.unavailable) {
             border-color: var(--gold);
             background: rgba(184, 149, 110, 0.1);
         }
@@ -417,19 +419,11 @@
             color: var(--white);
         }
 
-        .time-slot.booked {
+        .time-slot.unavailable {
             background: var(--blush);
             color: var(--rose);
             cursor: not-allowed;
             text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        .no-slots-message {
-            text-align: center;
-            color: var(--rose);
-            padding: 20px;
-            font-style: italic;
         }
 
         /* Services */
@@ -491,7 +485,7 @@
             margin-top: 16px;
         }
 
-        .book-btn:hover:not(:disabled) {
+        .book-btn:hover {
             background: var(--gold);
             transform: translateY(-2px);
             box-shadow: 0 12px 32px var(--shadow-deep);
@@ -504,47 +498,180 @@
             box-shadow: none;
         }
 
-        /* My Appointments Card */
-        .my-appointments {
+        /* Provider View Styles */
+        .provider-view {
+            display: none;
+        }
+
+        .provider-view.active {
+            display: block;
+        }
+
+        .client-view {
+            display: block;
+        }
+
+        .client-view.hidden {
+            display: none;
+        }
+
+        .availability-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-control {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid var(--blush);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .add-slot-btn {
+            padding: 14px 24px;
+            background: var(--sage);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-slot-btn:hover {
+            background: var(--gold);
+        }
+
+        /* Availability List */
+        .availability-list {
             margin-top: 24px;
         }
 
-        .my-appointment-item {
+        .availability-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 16px;
             background: var(--cream);
             border-radius: 12px;
             margin-bottom: 12px;
-            border-left: 4px solid var(--gold);
         }
 
-        .my-appointment-item .date {
+        .availability-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .availability-date {
             font-weight: 600;
-            margin-bottom: 4px;
         }
 
-        .my-appointment-item .details {
+        .availability-time {
+            color: var(--rose);
             font-size: 0.9rem;
+        }
+
+        .delete-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--blush);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
             color: var(--rose);
         }
 
-        .my-appointment-item .status {
-            display: inline-block;
-            padding: 4px 10px;
+        .delete-btn:hover {
+            background: #e74c3c;
+            color: var(--white);
+        }
+
+        /* Appointments List */
+        .appointments-list {
+            margin-top: 16px;
+        }
+
+        .appointment-item {
+            padding: 20px;
+            background: var(--cream);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .appointment-client {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .appointment-status {
+            padding: 4px 12px;
             border-radius: 100px;
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
-            margin-top: 8px;
+            letter-spacing: 0.05em;
         }
 
-        .my-appointment-item .status.confirmed {
+        .appointment-status.confirmed {
             background: var(--sage);
             color: var(--white);
         }
 
-        .my-appointment-item .status.pending {
+        .appointment-status.pending {
             background: var(--gold);
             color: var(--white);
+        }
+
+        .appointment-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 0.9rem;
+            color: var(--rose);
+        }
+
+        .appointment-details span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* Modal */
@@ -576,8 +703,6 @@
             padding: 40px;
             max-width: 480px;
             width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
             transform: translateY(20px);
             transition: all 0.3s ease;
         }
@@ -608,22 +733,6 @@
         .modal-input:focus {
             outline: none;
             border-color: var(--gold);
-        }
-
-        .modal-input.error {
-            border-color: var(--error);
-        }
-
-        .error-message {
-            color: var(--error);
-            font-size: 0.85rem;
-            margin-top: -12px;
-            margin-bottom: 16px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
         }
 
         .modal-actions {
@@ -661,38 +770,6 @@
         .modal-btn.confirm:hover {
             background: var(--gold);
             border-color: var(--gold);
-        }
-
-        /* Auth Tabs */
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--blush);
-        }
-
-        .auth-tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--rose);
-            transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-        }
-
-        .auth-tab.active {
-            color: var(--charcoal);
-            border-bottom-color: var(--gold);
-        }
-
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
         }
 
         /* Success Message */
@@ -759,10 +836,6 @@
             background: var(--sage);
         }
 
-        .toast.error {
-            background: var(--error);
-        }
-
         /* Animations */
         @keyframes fadeInUp {
             from {
@@ -802,15 +875,9 @@
                 grid-template-columns: repeat(3, 1fr);
             }
 
-            nav {
-                flex-wrap: wrap;
-                justify-content: center;
+            .form-row {
+                flex-direction: column;
             }
-        }
-
-        /* Hidden */
-        .hidden {
-            display: none !important;
         }
     </style>
 </head>
@@ -818,17 +885,10 @@
     <header>
         <div class="container">
             <div class="header-inner">
-                <a href="index.html" class="logo">Luxe<span>Book</span></a>
+                <div class="logo">Luxe<span>Book</span></div>
                 <nav>
-                    <div id="guestNav">
-                        <button class="nav-btn secondary" onclick="openAuthModal('login')">Sign In</button>
-                        <button class="nav-btn primary" onclick="openAuthModal('register')">Create Account</button>
-                    </div>
-                    <div id="userNav" class="user-menu hidden">
-                        <div class="user-avatar" id="userAvatar">JD</div>
-                        <span class="user-name" id="userName">John Doe</span>
-                        <button class="nav-btn secondary" onclick="logout()">Sign Out</button>
-                    </div>
+                    <button class="nav-btn secondary" onclick="showView('client')">Book Appointment</button>
+                    <button class="nav-btn primary" onclick="showView('provider')">Manage Availability</button>
                 </nav>
             </div>
         </div>
@@ -840,163 +900,213 @@
             <p>Seamless scheduling for nail techs, hair salons, and beauty professionals</p>
         </section>
 
-        <div class="main-content">
-            <div class="calendar-section animate-in delay-1">
-                <div class="calendar-header">
-                    <h2 class="calendar-title" id="calendarTitle">January 2026</h2>
-                    <div class="calendar-nav">
-                        <button onclick="changeMonth(-1)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M15 18l-6-6 6-6"/>
-                            </svg>
-                        </button>
-                        <button onclick="changeMonth(1)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                        </button>
+        <div class="view-toggle animate-in delay-1">
+            <button class="toggle-btn active" id="clientToggle" onclick="showView('client')">Client Booking</button>
+            <button class="toggle-btn" id="providerToggle" onclick="showView('provider')">Provider Dashboard</button>
+        </div>
+
+        <!-- Client View -->
+        <div class="client-view" id="clientView">
+            <div class="main-content">
+                <div class="calendar-section animate-in delay-2">
+                    <div class="calendar-header">
+                        <h2 class="calendar-title" id="calendarTitle">January 2026</h2>
+                        <div class="calendar-nav">
+                            <button onclick="changeMonth(-1)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            <button onclick="changeMonth(1)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot available"></div>
+                            <span>Available</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot booked"></div>
+                            <span>Booked</span>
+                        </div>
                     </div>
                 </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
-                <div class="calendar-legend">
-                    <div class="legend-item">
-                        <div class="legend-dot available"></div>
-                        <span>Available</span>
+
+                <aside class="sidebar">
+                    <div class="card animate-in delay-2">
+                        <h3 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            Available Times
+                        </h3>
+                        <div class="time-slots" id="timeSlots">
+                            <div class="time-slot">9:00 AM</div>
+                            <div class="time-slot">10:00 AM</div>
+                            <div class="time-slot unavailable">11:00 AM</div>
+                            <div class="time-slot">12:00 PM</div>
+                            <div class="time-slot">1:00 PM</div>
+                            <div class="time-slot unavailable">2:00 PM</div>
+                            <div class="time-slot">3:00 PM</div>
+                            <div class="time-slot">4:00 PM</div>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-dot booked"></div>
-                        <span>Fully Booked</span>
+
+                    <div class="card animate-in delay-3">
+                        <h3 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                            Services
+                        </h3>
+                        <div class="services-list" id="servicesList">
+                            <div class="service-item" data-service="manicure" data-price="45">
+                                <div class="service-info">
+                                    <h4>Classic Manicure</h4>
+                                    <span>45 minutes</span>
+                                </div>
+                                <div class="service-price">$45</div>
+                            </div>
+                            <div class="service-item" data-service="pedicure" data-price="55">
+                                <div class="service-info">
+                                    <h4>Luxury Pedicure</h4>
+                                    <span>60 minutes</span>
+                                </div>
+                                <div class="service-price">$55</div>
+                            </div>
+                            <div class="service-item" data-service="gelset" data-price="75">
+                                <div class="service-info">
+                                    <h4>Gel Full Set</h4>
+                                    <span>90 minutes</span>
+                                </div>
+                                <div class="service-price">$75</div>
+                            </div>
+                            <div class="service-item" data-service="haircut" data-price="65">
+                                <div class="service-info">
+                                    <h4>Haircut & Style</h4>
+                                    <span>60 minutes</span>
+                                </div>
+                                <div class="service-price">$65</div>
+                            </div>
+                        </div>
+                        <button class="book-btn" id="bookBtn" disabled onclick="openBookingModal()">
+                            Select Date & Time
+                        </button>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-dot unavailable"></div>
-                        <span>Unavailable</span>
-                    </div>
-                </div>
+                </aside>
             </div>
+        </div>
 
-            <aside class="sidebar">
-                <div class="card animate-in delay-2">
-                    <h3 class="card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 6v6l4 2"/>
-                        </svg>
-                        Available Times
-                    </h3>
-                    <div class="time-slots" id="timeSlots">
-                        <div class="no-slots-message">Select a date to see available times</div>
+        <!-- Provider View -->
+        <div class="provider-view" id="providerView">
+            <div class="main-content">
+                <div class="calendar-section">
+                    <div class="calendar-header">
+                        <h2 class="calendar-title" id="providerCalendarTitle">January 2026</h2>
+                        <div class="calendar-nav">
+                            <button onclick="changeMonth(-1)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            <button onclick="changeMonth(1)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="providerCalendarGrid"></div>
+
+                    <div class="availability-form">
+                        <h3 class="card-title" style="margin-top: 32px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                                <line x1="12" y1="14" x2="12" y2="18"/>
+                                <line x1="10" y1="16" x2="14" y2="16"/>
+                            </svg>
+                            Add Availability
+                        </h3>
+                        <div class="form-group">
+                            <label>Select Date</label>
+                            <input type="date" class="form-control" id="availabilityDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Time Range</label>
+                            <div class="form-row">
+                                <input type="time" class="form-control" id="startTime" value="09:00">
+                                <input type="time" class="form-control" id="endTime" value="17:00">
+                                <button class="add-slot-btn" onclick="addAvailability()">Add</button>
+                            </div>
+                        </div>
+
+                        <div class="availability-list" id="availabilityList"></div>
                     </div>
                 </div>
 
-                <div class="card animate-in delay-3">
-                    <h3 class="card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                        Services
-                    </h3>
-                    <div class="services-list" id="servicesList">
-                        <div class="service-item" data-service="manicure" data-price="45" data-duration="45">
-                            <div class="service-info">
-                                <h4>Classic Manicure</h4>
-                                <span>45 minutes</span>
+                <aside class="sidebar">
+                    <div class="card">
+                        <h3 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            Upcoming Appointments
+                        </h3>
+                        <div class="appointments-list" id="appointmentsList"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 20V10"/>
+                                <path d="M18 20V4"/>
+                                <path d="M6 20v-4"/>
+                            </svg>
+                            Quick Stats
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: center;">
+                            <div>
+                                <div style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 600; color: var(--gold);" id="totalBookings">12</div>
+                                <div style="font-size: 0.85rem; color: var(--rose);">This Week</div>
                             </div>
-                            <div class="service-price">$45</div>
-                        </div>
-                        <div class="service-item" data-service="pedicure" data-price="55" data-duration="60">
-                            <div class="service-info">
-                                <h4>Luxury Pedicure</h4>
-                                <span>60 minutes</span>
+                            <div>
+                                <div style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 600; color: var(--sage);" id="availableSlots">24</div>
+                                <div style="font-size: 0.85rem; color: var(--rose);">Open Slots</div>
                             </div>
-                            <div class="service-price">$55</div>
-                        </div>
-                        <div class="service-item" data-service="gelset" data-price="75" data-duration="90">
-                            <div class="service-info">
-                                <h4>Gel Full Set</h4>
-                                <span>90 minutes</span>
-                            </div>
-                            <div class="service-price">$75</div>
-                        </div>
-                        <div class="service-item" data-service="haircut" data-price="65" data-duration="60">
-                            <div class="service-info">
-                                <h4>Haircut & Style</h4>
-                                <span>60 minutes</span>
-                            </div>
-                            <div class="service-price">$65</div>
                         </div>
                     </div>
-                    <button class="book-btn" id="bookBtn" disabled onclick="handleBooking()">
-                        Select Date & Time
-                    </button>
-                </div>
-
-                <!-- My Appointments (logged in users) -->
-                <div class="card my-appointments hidden" id="myAppointmentsCard">
-                    <h3 class="card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6"/>
-                            <line x1="8" y1="2" x2="8" y2="6"/>
-                            <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        My Appointments
-                    </h3>
-                    <div id="myAppointmentsList"></div>
-                </div>
-            </aside>
+                </aside>
+            </div>
         </div>
     </main>
 
-    <!-- Auth Modal -->
-    <div class="modal-overlay" id="authModal">
-        <div class="modal">
-            <h2 id="authModalTitle">Welcome Back</h2>
-            <div class="auth-tabs">
-                <div class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">Sign In</div>
-                <div class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">Create Account</div>
-            </div>
-            
-            <!-- Login Form -->
-            <div class="auth-form active" id="loginForm">
-                <input type="email" class="modal-input" id="loginEmail" placeholder="Email Address">
-                <div class="error-message" id="loginEmailError">Please enter a valid email</div>
-                <input type="password" class="modal-input" id="loginPassword" placeholder="Password">
-                <div class="error-message" id="loginPasswordError">Password is required</div>
-                <div class="modal-actions">
-                    <button class="modal-btn cancel" onclick="closeAuthModal()">Cancel</button>
-                    <button class="modal-btn confirm" onclick="handleLogin()">Sign In</button>
-                </div>
-            </div>
-
-            <!-- Register Form -->
-            <div class="auth-form" id="registerForm">
-                <input type="text" class="modal-input" id="registerName" placeholder="Full Name">
-                <div class="error-message" id="registerNameError">Name is required</div>
-                <input type="email" class="modal-input" id="registerEmail" placeholder="Email Address">
-                <div class="error-message" id="registerEmailError">Please enter a valid email</div>
-                <input type="tel" class="modal-input" id="registerPhone" placeholder="Phone Number">
-                <div class="error-message" id="registerPhoneError">Phone number is required</div>
-                <input type="password" class="modal-input" id="registerPassword" placeholder="Password">
-                <div class="error-message" id="registerPasswordError">Password must be at least 6 characters</div>
-                <div class="modal-actions">
-                    <button class="modal-btn cancel" onclick="closeAuthModal()">Cancel</button>
-                    <button class="modal-btn confirm" onclick="handleRegister()">Create Account</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Booking Confirmation Modal -->
+    <!-- Booking Modal -->
     <div class="modal-overlay" id="bookingModal">
         <div class="modal">
             <div id="bookingForm">
-                <h2>Confirm Your Booking</h2>
-                <div id="bookingSummary" style="background: var(--cream); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                    <div id="summaryContent"></div>
+                <h2>Complete Your Booking</h2>
+                <input type="text" class="modal-input" id="clientName" placeholder="Your Name">
+                <input type="email" class="modal-input" id="clientEmail" placeholder="Email Address">
+                <input type="tel" class="modal-input" id="clientPhone" placeholder="Phone Number">
+                <textarea class="modal-input" id="clientNotes" placeholder="Special requests or notes..." style="resize: vertical; min-height: 80px;"></textarea>
+                <div id="bookingSummary" style="background: var(--cream); padding: 16px; border-radius: 12px; margin-top: 8px;">
+                    <div style="font-size: 0.9rem; color: var(--rose);">Booking Summary</div>
+                    <div id="summaryContent" style="margin-top: 8px; font-weight: 500;"></div>
                 </div>
-                <textarea class="modal-input" id="bookingNotes" placeholder="Special requests or notes (optional)" style="resize: vertical; min-height: 80px;"></textarea>
                 <div class="modal-actions">
-                    <button class="modal-btn cancel" onclick="closeBookingModal()">Cancel</button>
+                    <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
                     <button class="modal-btn confirm" onclick="confirmBooking()">Confirm Booking</button>
                 </div>
             </div>
@@ -1006,9 +1116,9 @@
                         <path d="M20 6L9 17l-5-5"/>
                     </svg>
                 </div>
-                <h3>Booking Requested!</h3>
-                <p>Your appointment is pending confirmation. You'll receive an update soon.</p>
-                <button class="book-btn" onclick="closeBookingModal()" style="max-width: 200px; margin: 0 auto;">Done</button>
+                <h3>Booking Confirmed!</h3>
+                <p>You'll receive a confirmation email shortly.</p>
+                <button class="book-btn" onclick="closeModal()" style="max-width: 200px; margin: 0 auto;">Done</button>
             </div>
         </div>
     </div>
@@ -1018,222 +1128,115 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 6L9 17l-5-5"/>
         </svg>
-        <span id="toastMessage">Success!</span>
+        <span id="toastMessage">Availability added successfully!</span>
     </div>
 
     <script>
-        // ============================================
-        // DATA STORE (In production, use a real database)
-        // ============================================
-        
-        // Initialize from localStorage or use defaults
-        function loadData() {
-            const stored = localStorage.getItem('luxebook_data');
-            if (stored) {
-                return JSON.parse(stored);
-            }
-            return {
-                users: [],
-                availability: [
-                    { date: '2026-01-31', slots: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'] },
-                    { date: '2026-02-02', slots: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'] },
-                    { date: '2026-02-03', slots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00'] },
-                    { date: '2026-02-05', slots: ['11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
-                    { date: '2026-02-06', slots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'] },
-                    { date: '2026-02-09', slots: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00'] },
-                    { date: '2026-02-10', slots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'] },
-                    { date: '2026-02-12', slots: ['10:00', '11:00', '12:00', '14:00', '15:00', '16:00'] },
-                    { date: '2026-02-13', slots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'] },
-                ],
-                appointments: []
-            };
-        }
-
-        function saveData() {
-            localStorage.setItem('luxebook_data', JSON.stringify(data));
-        }
-
-        let data = loadData();
-        let currentUser = JSON.parse(localStorage.getItem('luxebook_currentUser')) || null;
-
-        // ============================================
-        // STATE
-        // ============================================
-        let currentDate = new Date(2026, 0, 30);
+        // State
+        let currentDate = new Date(2026, 0, 30); // January 30, 2026
         let currentMonth = currentDate.getMonth();
         let currentYear = currentDate.getFullYear();
         let selectedDate = null;
         let selectedTime = null;
         let selectedService = null;
 
-        // ============================================
-        // INITIALIZATION
-        // ============================================
+        // Sample data
+        let availability = [
+            { date: '2026-01-31', start: '09:00', end: '17:00' },
+            { date: '2026-02-02', start: '10:00', end: '18:00' },
+            { date: '2026-02-03', start: '09:00', end: '15:00' },
+            { date: '2026-02-05', start: '11:00', end: '19:00' },
+            { date: '2026-02-06', start: '09:00', end: '17:00' },
+            { date: '2026-02-10', start: '09:00', end: '17:00' },
+        ];
+
+        let appointments = [
+            { id: 1, date: '2026-01-31', time: '10:00 AM', client: 'Sarah Johnson', service: 'Gel Full Set', status: 'confirmed' },
+            { id: 2, date: '2026-01-31', time: '2:00 PM', client: 'Emily Chen', service: 'Classic Manicure', status: 'pending' },
+            { id: 3, date: '2026-02-02', time: '11:00 AM', client: 'Maria Garcia', service: 'Luxury Pedicure', status: 'confirmed' },
+        ];
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderCalendar();
+            renderProviderCalendar();
+            renderAvailabilityList();
+            renderAppointmentsList();
+            setupTimeSlots();
             setupServices();
-            updateAuthUI();
-            if (currentUser) {
-                renderMyAppointments();
-            }
+            updateStats();
         });
 
-        // ============================================
-        // AUTHENTICATION
-        // ============================================
-        function openAuthModal(tab = 'login') {
-            document.getElementById('authModal').classList.add('active');
-            switchAuthTab(tab);
-        }
+        // View switching
+        function showView(view) {
+            const clientView = document.getElementById('clientView');
+            const providerView = document.getElementById('providerView');
+            const clientToggle = document.getElementById('clientToggle');
+            const providerToggle = document.getElementById('providerToggle');
 
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.remove('active');
-            clearAuthErrors();
-        }
-
-        function switchAuthTab(tab) {
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-            
-            document.querySelector(`.auth-tab[data-tab="${tab}"]`).classList.add('active');
-            document.getElementById(tab + 'Form').classList.add('active');
-            
-            document.getElementById('authModalTitle').textContent = tab === 'login' ? 'Welcome Back' : 'Create Account';
-            clearAuthErrors();
-        }
-
-        function clearAuthErrors() {
-            document.querySelectorAll('.modal-input').forEach(i => i.classList.remove('error'));
-            document.querySelectorAll('.error-message').forEach(e => e.classList.remove('show'));
-        }
-
-        function handleLogin() {
-            clearAuthErrors();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            let valid = true;
-
-            if (!email || !email.includes('@')) {
-                document.getElementById('loginEmail').classList.add('error');
-                document.getElementById('loginEmailError').classList.add('show');
-                valid = false;
-            }
-
-            if (!password) {
-                document.getElementById('loginPassword').classList.add('error');
-                document.getElementById('loginPasswordError').classList.add('show');
-                valid = false;
-            }
-
-            if (!valid) return;
-
-            // Find user
-            const user = data.users.find(u => u.email === email && u.password === password);
-            if (!user) {
-                showToast('Invalid email or password', 'error');
-                return;
-            }
-
-            currentUser = user;
-            localStorage.setItem('luxebook_currentUser', JSON.stringify(user));
-            closeAuthModal();
-            updateAuthUI();
-            renderMyAppointments();
-            showToast('Welcome back, ' + user.name.split(' ')[0] + '!', 'success');
-        }
-
-        function handleRegister() {
-            clearAuthErrors();
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const phone = document.getElementById('registerPhone').value.trim();
-            const password = document.getElementById('registerPassword').value;
-
-            let valid = true;
-
-            if (!name) {
-                document.getElementById('registerName').classList.add('error');
-                document.getElementById('registerNameError').classList.add('show');
-                valid = false;
-            }
-
-            if (!email || !email.includes('@')) {
-                document.getElementById('registerEmail').classList.add('error');
-                document.getElementById('registerEmailError').classList.add('show');
-                valid = false;
-            }
-
-            if (!phone) {
-                document.getElementById('registerPhone').classList.add('error');
-                document.getElementById('registerPhoneError').classList.add('show');
-                valid = false;
-            }
-
-            if (!password || password.length < 6) {
-                document.getElementById('registerPassword').classList.add('error');
-                document.getElementById('registerPasswordError').classList.add('show');
-                valid = false;
-            }
-
-            if (!valid) return;
-
-            // Check if email exists
-            if (data.users.find(u => u.email === email)) {
-                showToast('An account with this email already exists', 'error');
-                return;
-            }
-
-            // Create user
-            const newUser = {
-                id: Date.now().toString(),
-                name,
-                email,
-                phone,
-                password,
-                createdAt: new Date().toISOString()
-            };
-
-            data.users.push(newUser);
-            saveData();
-
-            currentUser = newUser;
-            localStorage.setItem('luxebook_currentUser', JSON.stringify(newUser));
-            closeAuthModal();
-            updateAuthUI();
-            renderMyAppointments();
-            showToast('Account created! Welcome, ' + name.split(' ')[0] + '!', 'success');
-        }
-
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('luxebook_currentUser');
-            updateAuthUI();
-            document.getElementById('myAppointmentsCard').classList.add('hidden');
-            showToast('Signed out successfully', 'success');
-        }
-
-        function updateAuthUI() {
-            const guestNav = document.getElementById('guestNav');
-            const userNav = document.getElementById('userNav');
-
-            if (currentUser) {
-                guestNav.classList.add('hidden');
-                userNav.classList.remove('hidden');
-                document.getElementById('userName').textContent = currentUser.name;
-                document.getElementById('userAvatar').textContent = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            if (view === 'client') {
+                clientView.classList.remove('hidden');
+                providerView.classList.remove('active');
+                clientToggle.classList.add('active');
+                providerToggle.classList.remove('active');
             } else {
-                guestNav.classList.remove('hidden');
-                userNav.classList.add('hidden');
+                clientView.classList.add('hidden');
+                providerView.classList.add('active');
+                clientToggle.classList.remove('active');
+                providerToggle.classList.add('active');
             }
         }
 
-        // ============================================
-        // CALENDAR
-        // ============================================
+        // Calendar rendering
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
             const title = document.getElementById('calendarTitle');
+            
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+            title.textContent = `${months[currentMonth]} ${currentYear}`;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+
+            let html = '';
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                html += `<div class="day-header">${day}</div>`;
+            });
+
+            // Empty cells for days before first of month
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="day-cell empty"></div>`;
+            }
+
+            // Day cells
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const cellDate = new Date(currentYear, currentMonth, day);
+                const isPast = cellDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                const isToday = cellDate.toDateString() === today.toDateString();
+                const isAvailable = availability.some(a => a.date === dateStr);
+                const isBooked = appointments.some(a => a.date === dateStr);
+                const isSelected = selectedDate === dateStr;
+
+                let classes = 'day-cell';
+                if (isPast) classes += ' past';
+                if (isToday) classes += ' today';
+                if (isAvailable && !isPast) classes += ' available';
+                if (isBooked) classes += ' booked';
+                if (isSelected) classes += ' selected';
+
+                html += `<div class="${classes}" data-date="${dateStr}" onclick="selectDate('${dateStr}', ${isPast})">${day}</div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function renderProviderCalendar() {
+            const grid = document.getElementById('providerCalendarGrid');
+            const title = document.getElementById('providerCalendarTitle');
             
             const months = ['January', 'February', 'March', 'April', 'May', 'June', 
                            'July', 'August', 'September', 'October', 'November', 'December'];
@@ -1258,28 +1261,16 @@
                 const cellDate = new Date(currentYear, currentMonth, day);
                 const isPast = cellDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
                 const isToday = cellDate.toDateString() === today.toDateString();
-                
-                const availabilityData = data.availability.find(a => a.date === dateStr);
-                const hasAvailability = availabilityData && availabilityData.slots.length > 0;
-                
-                // Check how many slots are booked
-                const bookedSlots = data.appointments.filter(a => a.date === dateStr && a.status !== 'cancelled').map(a => a.time);
-                const availableSlots = hasAvailability ? availabilityData.slots.filter(s => !bookedSlots.includes(s)) : [];
-                const isFullyBooked = hasAvailability && availableSlots.length === 0;
-                
-                const isSelected = selectedDate === dateStr;
+                const isAvailable = availability.some(a => a.date === dateStr);
+                const appointmentCount = appointments.filter(a => a.date === dateStr).length;
 
                 let classes = 'day-cell';
                 if (isPast) classes += ' past';
-                else if (!hasAvailability) classes += ' no-availability';
-                else if (isFullyBooked) classes += ' fully-booked';
-                else classes += ' available';
-                
-                if (isToday && !isPast) classes += ' today';
-                if (isSelected) classes += ' selected';
+                if (isToday) classes += ' today';
+                if (isAvailable && !isPast) classes += ' available';
+                if (appointmentCount > 0) classes += ' booked';
 
-                const clickable = !isPast && hasAvailability && !isFullyBooked;
-                html += `<div class="${classes}" data-date="${dateStr}" ${clickable ? `onclick="selectDate('${dateStr}')"` : ''}>${day}</div>`;
+                html += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
             }
 
             grid.innerHTML = html;
@@ -1295,12 +1286,16 @@
                 currentYear--;
             }
             renderCalendar();
+            renderProviderCalendar();
         }
 
-        function selectDate(dateStr) {
+        function selectDate(dateStr, isPast) {
+            if (isPast) return;
+            
             selectedDate = dateStr;
             selectedTime = null;
             
+            // Update calendar UI
             document.querySelectorAll('#calendarGrid .day-cell').forEach(cell => {
                 cell.classList.remove('selected');
                 if (cell.dataset.date === dateStr) {
@@ -1308,75 +1303,57 @@
                 }
             });
 
-            renderTimeSlots(dateStr);
+            // Update time slots based on availability
+            updateTimeSlots(dateStr);
             updateBookButton();
         }
 
-        // ============================================
-        // TIME SLOTS
-        // ============================================
-        function renderTimeSlots(dateStr) {
-            const container = document.getElementById('timeSlots');
-            const availabilityData = data.availability.find(a => a.date === dateStr);
+        function updateTimeSlots(dateStr) {
+            const availableDay = availability.find(a => a.date === dateStr);
+            const bookedTimes = appointments.filter(a => a.date === dateStr).map(a => a.time);
+            const slots = document.querySelectorAll('#timeSlots .time-slot');
             
-            if (!availabilityData || availabilityData.slots.length === 0) {
-                container.innerHTML = '<div class="no-slots-message">No available times for this date</div>';
-                return;
-            }
-
-            const bookedSlots = data.appointments
-                .filter(a => a.date === dateStr && a.status !== 'cancelled')
-                .map(a => a.time);
-
-            let html = '';
-            availabilityData.slots.forEach(slot => {
-                const isBooked = bookedSlots.includes(slot);
-                const formattedTime = formatTime(slot);
-                html += `<div class="time-slot ${isBooked ? 'booked' : ''}" 
-                              data-time="${slot}" 
-                              ${!isBooked ? `onclick="selectTime('${slot}')"` : ''}>
-                    ${formattedTime}
-                </div>`;
-            });
-
-            container.innerHTML = html;
-        }
-
-        function selectTime(time) {
-            selectedTime = time;
-            
-            document.querySelectorAll('#timeSlots .time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-                if (slot.dataset.time === time) {
-                    slot.classList.add('selected');
+            slots.forEach(slot => {
+                slot.classList.remove('selected', 'unavailable');
+                
+                if (!availableDay) {
+                    slot.classList.add('unavailable');
+                } else {
+                    const slotTime = slot.textContent;
+                    if (bookedTimes.includes(slotTime)) {
+                        slot.classList.add('unavailable');
+                    }
                 }
             });
-
-            updateBookButton();
         }
 
-        // ============================================
-        // SERVICES
-        // ============================================
+        function setupTimeSlots() {
+            document.querySelectorAll('#timeSlots .time-slot').forEach(slot => {
+                slot.addEventListener('click', function() {
+                    if (this.classList.contains('unavailable')) return;
+                    
+                    document.querySelectorAll('#timeSlots .time-slot').forEach(s => s.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedTime = this.textContent;
+                    updateBookButton();
+                });
+            });
+        }
+
         function setupServices() {
             document.querySelectorAll('.service-item').forEach(item => {
                 item.addEventListener('click', function() {
                     document.querySelectorAll('.service-item').forEach(s => s.classList.remove('selected'));
                     this.classList.add('selected');
                     selectedService = {
-                        id: this.dataset.service,
                         name: this.querySelector('h4').textContent,
-                        price: this.dataset.price,
-                        duration: this.dataset.duration
+                        price: this.dataset.price
                     };
                     updateBookButton();
                 });
             });
         }
 
-        // ============================================
-        // BOOKING
-        // ============================================
         function updateBookButton() {
             const btn = document.getElementById('bookBtn');
             if (selectedDate && selectedTime && selectedService) {
@@ -1394,16 +1371,7 @@
             }
         }
 
-        function handleBooking() {
-            if (!currentUser) {
-                openAuthModal('login');
-                showToast('Please sign in to book an appointment', 'error');
-                return;
-            }
-
-            openBookingModal();
-        }
-
+        // Modal functions
         function openBookingModal() {
             const modal = document.getElementById('bookingModal');
             const summary = document.getElementById('summaryContent');
@@ -1412,22 +1380,9 @@
             const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
             
             summary.innerHTML = `
-                <div style="margin-bottom: 12px;">
-                    <div style="font-size: 0.85rem; color: var(--rose); margin-bottom: 4px;">Service</div>
-                    <div style="font-weight: 600;">${selectedService.name}</div>
-                    <div style="font-size: 0.9rem; color: var(--rose);">${selectedService.duration} minutes</div>
-                </div>
-                <div style="margin-bottom: 12px;">
-                    <div style="font-size: 0.85rem; color: var(--rose); margin-bottom: 4px;">Date & Time</div>
-                    <div style="font-weight: 600;">${formattedDate}</div>
-                    <div style="font-size: 0.9rem;">${formatTime(selectedTime)}</div>
-                </div>
-                <div style="border-top: 1px solid var(--blush); padding-top: 12px; margin-top: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 600;">Total</span>
-                        <span style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--gold);">$${selectedService.price}</span>
-                    </div>
-                </div>
+                <div><strong>${selectedService.name}</strong></div>
+                <div>${formattedDate} at ${selectedTime}</div>
+                <div style="color: var(--gold); margin-top: 8px; font-size: 1.1rem;">Total: $${selectedService.price}</div>
             `;
             
             modal.classList.add('active');
@@ -1435,89 +1390,176 @@
             document.getElementById('bookingSuccess').style.display = 'none';
         }
 
-        function closeBookingModal() {
+        function closeModal() {
             document.getElementById('bookingModal').classList.remove('active');
-            document.getElementById('bookingNotes').value = '';
         }
 
         function confirmBooking() {
-            const notes = document.getElementById('bookingNotes').value.trim();
+            const name = document.getElementById('clientName').value;
+            const email = document.getElementById('clientEmail').value;
+            
+            if (!name || !email) {
+                alert('Please fill in your name and email');
+                return;
+            }
 
-            // Create appointment
-            const appointment = {
-                id: Date.now().toString(),
-                userId: currentUser.id,
-                userName: currentUser.name,
-                userEmail: currentUser.email,
-                userPhone: currentUser.phone,
+            // Add to appointments
+            appointments.push({
+                id: appointments.length + 1,
                 date: selectedDate,
                 time: selectedTime,
+                client: name,
                 service: selectedService.name,
-                serviceId: selectedService.id,
-                price: selectedService.price,
-                duration: selectedService.duration,
-                notes: notes,
-                status: 'pending', // pending, confirmed, cancelled
-                createdAt: new Date().toISOString()
-            };
-
-            data.appointments.push(appointment);
-            saveData();
+                status: 'confirmed'
+            });
 
             // Show success
             document.getElementById('bookingForm').style.display = 'none';
             document.getElementById('bookingSuccess').style.display = 'block';
 
+            // Reset form
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientEmail').value = '';
+            document.getElementById('clientPhone').value = '';
+            document.getElementById('clientNotes').value = '';
+
             // Update UI
             renderCalendar();
-            renderTimeSlots(selectedDate);
-            renderMyAppointments();
+            renderProviderCalendar();
+            renderAppointmentsList();
+            updateStats();
 
             // Reset selections
             selectedDate = null;
             selectedTime = null;
             selectedService = null;
             document.querySelectorAll('.service-item').forEach(s => s.classList.remove('selected'));
-            document.getElementById('timeSlots').innerHTML = '<div class="no-slots-message">Select a date to see available times</div>';
+            document.querySelectorAll('#timeSlots .time-slot').forEach(s => s.classList.remove('selected'));
             updateBookButton();
         }
 
-        // ============================================
-        // MY APPOINTMENTS
-        // ============================================
-        function renderMyAppointments() {
-            if (!currentUser) return;
+        // Provider functions
+        function addAvailability() {
+            const date = document.getElementById('availabilityDate').value;
+            const start = document.getElementById('startTime').value;
+            const end = document.getElementById('endTime').value;
 
-            const card = document.getElementById('myAppointmentsCard');
-            const list = document.getElementById('myAppointmentsList');
-            
-            const myAppts = data.appointments
-                .filter(a => a.userId === currentUser.id && a.status !== 'cancelled')
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            if (myAppts.length === 0) {
-                card.classList.add('hidden');
+            if (!date || !start || !end) {
+                alert('Please fill in all fields');
                 return;
             }
 
-            card.classList.remove('hidden');
+            // Check if date already exists
+            const existingIndex = availability.findIndex(a => a.date === date);
+            if (existingIndex > -1) {
+                availability[existingIndex] = { date, start, end };
+            } else {
+                availability.push({ date, start, end });
+            }
 
-            list.innerHTML = myAppts.map(apt => {
-                const dateObj = new Date(apt.date + 'T12:00:00');
+            renderAvailabilityList();
+            renderCalendar();
+            renderProviderCalendar();
+            updateStats();
+            showToast('Availability added successfully!');
+
+            // Reset form
+            document.getElementById('availabilityDate').value = '';
+        }
+
+        function removeAvailability(date) {
+            availability = availability.filter(a => a.date !== date);
+            renderAvailabilityList();
+            renderCalendar();
+            renderProviderCalendar();
+            updateStats();
+            showToast('Availability removed');
+        }
+
+        function renderAvailabilityList() {
+            const list = document.getElementById('availabilityList');
+            
+            if (availability.length === 0) {
+                list.innerHTML = '<p style="color: var(--rose); text-align: center; padding: 20px;">No availability set</p>';
+                return;
+            }
+
+            const sortedAvailability = [...availability].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            list.innerHTML = sortedAvailability.map(a => {
+                const dateObj = new Date(a.date + 'T12:00:00');
                 const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 return `
-                    <div class="my-appointment-item">
-                        <div class="date">${formattedDate} at ${formatTime(apt.time)}</div>
-                        <div class="details">${apt.service} — $${apt.price}</div>
-                        <span class="status ${apt.status}">${apt.status}</span>
+                    <div class="availability-item">
+                        <div class="availability-info">
+                            <div class="availability-date">${formattedDate}</div>
+                            <div class="availability-time">${formatTime(a.start)} - ${formatTime(a.end)}</div>
+                        </div>
+                        <button class="delete-btn" onclick="removeAvailability('${a.date}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
                     </div>
                 `;
             }).join('');
         }
 
-        // ============================================
-        // UTILITIES
-        // ============================================
+        function renderAppointmentsList() {
+            const list = document.getElementById('appointmentsList');
+            
+            if (appointments.length === 0) {
+                list.innerHTML = '<p style="color: var(--rose); text-align: center; padding: 20px;">No upcoming appointments</p>';
+                return;
+            }
+
+            const sortedAppointments = [...appointments].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            list.innerHTML = sortedAppointments.slice(0, 5).map(apt => {
+                const dateObj = new Date(apt.date + 'T12:00:00');
+                const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                return `
+                    <div class="appointment-item">
+                        <div class="appointment-header">
+                            <div class="appointment-client">${apt.client}</div>
+                            <span class="appointment-status ${apt.status}">${apt.status}</span>
+                        </div>
+                        <div class="appointment-details">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                ${formattedDate}
+                            </span>
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                ${apt.time}
+                            </span>
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                                ${apt.service}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalBookings').textContent = appointments.length;
+            document.getElementById('availableSlots').textContent = availability.length * 8; // Rough estimate
+        }
+
         function formatTime(time24) {
             const [hours, minutes] = time24.split(':');
             const hour = parseInt(hours);
@@ -1526,26 +1568,22 @@
             return `${hour12}:${minutes} ${ampm}`;
         }
 
-        function showToast(message, type = 'success') {
+        function showToast(message) {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
-            
             toastMessage.textContent = message;
-            toast.classList.remove('success', 'error');
-            toast.classList.add('show', type);
+            toast.classList.add('show', 'success');
             
             setTimeout(() => {
-                toast.classList.remove('show');
+                toast.classList.remove('show', 'success');
             }, 3000);
         }
 
-        // Close modals on backdrop click
-        document.getElementById('authModal').addEventListener('click', function(e) {
-            if (e.target === this) closeAuthModal();
-        });
-
+        // Close modal on backdrop click
         document.getElementById('bookingModal').addEventListener('click', function(e) {
-            if (e.target === this) closeBookingModal();
+            if (e.target === this) {
+                closeModal();
+            }
         });
     </script>
 </body>
